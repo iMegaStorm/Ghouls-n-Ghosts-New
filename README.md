@@ -1,2 +1,1 @@
-# Ghouls-n-Ghosts-New
- Starting over
+# Dai-Makai-Mura

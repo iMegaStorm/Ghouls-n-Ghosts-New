@@ -1,0 +1,11 @@
+GameScreen background - https://www.shutterstock.com/image-illustration/mysterious-dungeon-opening-gates-blue-tones-1025309557
+Play/Exit Buttons - https://dabuttonfactory.com/
+MainCharacter Animations - https://rvros.itch.io/animated-pixel-hero
+Fantasy icons pack - https://shikashiassets.itch.io/shikashis-fantasy-icons-pack
+
+
+
+Text colour
+
+#7B80A1
+#7284AA
