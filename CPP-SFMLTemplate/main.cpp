@@ -3,16 +3,19 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "Initialise.h"
-#include "Animation.h"
-
+#include "Player.h"
+#include "Enemies.h"
 
 //Compiler Directives
 using namespace std;
-using namespace sf;
 
 RenderWindow window(VideoMode(800, 600), "Ghouls 'n Ghosts"); // 13 squares wide, 9 square high
+//sf::View view;
+
 
 Initialise init;
+Enemies enemies;
+Wolf wolf;
 
 //Game Screen Variables
 	//Assigns a value for each screen
@@ -20,20 +23,19 @@ const int GAME_MENU_SCREEN = 0; //Main game screen
 const int INSTRUCTIONS_MENU_SCREEN = 1; //Instructions Menu screen
 const int LEVEL_1_SCREEN = 2; // Level 1 of the game
 const int GAME_OVER_SCREEN = 3; //Game Over screen
-int CURRENT_SCREEN = GAME_MENU_SCREEN; //Using current screen in order to switch to another screen
+int CURRENT_SCREEN = LEVEL_1_SCREEN; //Using current screen in order to switch to another screen
 int level = 1; 
 int offsetX = 0;
 int offsetY = 0;
 
 Vector2i MouseCursorLocation(0,0);
 
-Vector2f fireBallLocation(10,520);
-Vector2f arrowLocation(10,520);
+sf::Vector2f fireBallLocation(10,520);
+sf::Vector2f arrowLocation(10,520);
 
-bool powerUp = false;
+bool weaponActive = false;
 
-
-void drawDebugLayout(int playField[20][50]) {
+/*void drawDebugLayout(int playField[20][50]) {
 	for (int i = 0; i < 15; i++)
     {
         cout<<  endl;
@@ -43,14 +45,14 @@ void drawDebugLayout(int playField[20][50]) {
 	int i, j;
 	for(i=0; i<20; i++)
 	{
-		for(j=0; j<25; j++)
+		for(j=0; j<50; j++)
 		{
 			cout<<playField[i][j]<<' ';	
 		}
 		cout<<'\n';
 	}
 	cout<<'\n';
-}
+}*/
 
 void spawnGrass(int tileGrass, int tilePositionX, int tilePositionY, Sprite tiles[1])
 {
@@ -66,7 +68,7 @@ Sprite &healthPotion, Sprite &chest, Sprite &grass, Sprite &fireBall, Sprite &ar
 
 	instructionMenu = init.LoadSpriteFromTexture("Assets/Menus/", "InstructionsMenu", "png");
 
-	background = init.LoadSpriteFromTexture("Assets/Menus/", "BackGround", "png");
+	background = init.LoadSpriteFromTexture("Assets/Menus/", "BackGround2", "png");
 	background.setPosition(0,-28);
 
 	playButton = init.LoadSpriteFromTexture("Assets/Menus/", "playButton", "png");
@@ -100,64 +102,73 @@ Sprite &healthPotion, Sprite &chest, Sprite &grass, Sprite &fireBall, Sprite &ar
 	arrow.setScale(1.5, 1.5);
 
 	swordPowerUp = init.LoadSpriteFromTexture("Assets/Objects/", "SwordPowerUp", "png");
-	swordPowerUp.setPosition(600, 527); 
+	//swordPowerUp.setPosition(150, 527); 
+	swordPowerUp.setPosition(-50, -50); 
 
 	spellPowerUp = init.LoadSpriteFromTexture("Assets/Objects/", "SpellPowerUp", "png");
-	spellPowerUp.setPosition(150, 527);
-
+	//spellPowerUp.setPosition(600, 527);
+	spellPowerUp.setPosition(-50, -50); 
 	bowPowerUp = init.LoadSpriteFromTexture("Assets/Objects/", "BowPowerUp", "png");
-	bowPowerUp.setPosition(250, 527);
-
+	//bowPowerUp.setPosition(500, 527);
+	bowPowerUp.setPosition(-50, -50); 
 }
 
 int main()
 {
-//Local Variable
+//Local Variables
 	//Event Variables
 	Event event;
 	//Local Variables
 	Clock ClockTime;
 	Time speed;
 
-	Clock animationClock;
+	sf::Clock animationClock;
 	float animationDelay = 0.04f;
 
 	int currentHealth = 3;
+	bool canShoot = true;
+	bool newChest = true;
 
 	Sprite gameScreen, playButton, exitButton, startButton, instructionMenu, background, health, healthPotion, chest, grass, fireBall, arrow, swordPowerUp, spellPowerUp, bowPowerUp;
 	Init(gameScreen, playButton, exitButton, startButton, instructionMenu, background, health, healthPotion, chest, grass, fireBall, arrow, swordPowerUp, spellPowerUp, bowPowerUp);
 
+	sf::Texture playerTexture;
+	playerTexture.loadFromFile("Assets/Main Character/MainCharacterSheet.png");
+	Player player(&playerTexture, sf::Vector2u(6,6), 0.3f, 100.0f, 100.0f, sf::Vector2f(100.0f, 475.0f), 200);
+
+	
 	float deltaTime = 0.0f;
-	Clock clock;
+	sf::Clock clock;
 
 	window.setFramerateLimit(60);
 	
 
 	int i, j;
-	int playField[20][50] =
+	srand(time(NULL));
+	int playField[20][58] =
 	{
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 	};
-	drawDebugLayout(playField);
+	//drawDebugLayout(playField);
 
 
 Sprite tiles[1] = {grass};
@@ -165,16 +176,13 @@ Sprite tiles[1] = {grass};
 	while (window.isOpen()) //The Game Window Loop
 	{
 		deltaTime = ClockTime.restart().asSeconds();
-		if(deltaTime > 1.0f / 20.0f)
-			deltaTime = 1.0f / 20.0f;
-
 		while (window.pollEvent(event)) //Checks for input for keyboard
 		{
 			if (event.type == Event::Closed || Keyboard::isKeyPressed(Keyboard::Escape)) //Checks to see if the window is closed and then executes the code
 			{
 				window.close(); //closes the window
 				break;
-			}
+			}			
 			if (event.type == Event::MouseMoved) //Mouse Movement
 				{
 				MouseCursorLocation = Mouse::getPosition(window); //Get position within the window
@@ -197,48 +205,164 @@ Sprite tiles[1] = {grass};
 						}
 					}
 				}
-		if(event.type == Event::KeyPressed) 
-			{
-				
-			}
-		}
-		window.clear();
-
-		
-		if (CURRENT_SCREEN == GAME_MENU_SCREEN)
-		{
-			window.draw(gameScreen);
-			window.draw(playButton);
-			window.draw(exitButton);
-		}
-	else if (CURRENT_SCREEN == INSTRUCTIONS_MENU_SCREEN)
-		{
-			window.draw(instructionMenu);
-			window.draw(startButton);
-		}
-	else if (CURRENT_SCREEN == LEVEL_1_SCREEN)
-		{
-			window.draw(background);
-
-			for(i = 0; i<20; i++) 
-			{
-				for(j = 0; j<25; j++)
+				if(event.type == Event::KeyPressed) 
 				{
-					if(playField[i][j] == 2)
-					{
-						spawnGrass (playField[i][j], j, i, tiles);
-					}
+					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && canShoot && player.powerUp == 2 && player.canAttack && player.cantMove == false) //The <Control> Keyboard Key Is Pressed...
+						{
+						canShoot = false;
+						weaponActive = true;
+						fireBallLocation.x = player.GetPosition().x -50;
+						fireBallLocation.y = player.GetPosition().y +20;
+						fireBall.setPosition(player.mainCharacter.getPosition());
+						}
+					else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && canShoot && player.powerUp == 3 && player.canAttack && player.cantMove == false) //The <Control> Keyboard Key Is Pressed...
+						{
+						canShoot = false;
+						weaponActive = true;
+						arrowLocation.x = player.GetPosition().x;
+						arrowLocation.y = player.GetPosition().y +27;
+						arrow.setPosition(player.mainCharacter.getPosition());
+						}
+				}			
+		}
+		//cout << sf::Keyboard::isKeyPressed(sf::Keyboard::Space) << "/" << player.powerUp << "/" << player.canAttack << "/" << player.cantMove << endl;
+	window.clear();
+
+	if (CURRENT_SCREEN == GAME_MENU_SCREEN)
+	{
+		window.draw(gameScreen);
+		window.draw(playButton);
+		window.draw(exitButton);
+	}
+	else if (CURRENT_SCREEN == INSTRUCTIONS_MENU_SCREEN)
+	{
+		window.draw(instructionMenu);
+		window.draw(startButton);
+	}
+	else if (CURRENT_SCREEN == LEVEL_1_SCREEN)
+	{
+		//window.draw(background);
+		//player.Draw(window);
+		//wolf.Draw(window);
+
+		for(i = 0; i<20; i++) 
+		{
+			for(j = 0; j<58; j++)
+			{
+				if(playField[i][j] == 2)
+				{
+					spawnGrass (playField[i][j], j, i, tiles);
 				}
 			}
 		}
-	else if (CURRENT_SCREEN == GAME_OVER_SCREEN)
+		int randNo;
+		if (player.Intersects(chest,0, 0, false) && sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && newChest)
 		{
-			if (Keyboard::isKeyPressed(Keyboard::Return))
+			for(i = 0; i < 1; i++)
 			{
-				CURRENT_SCREEN = LEVEL_1_SCREEN;
+				srand(time(NULL));
+				randNo = rand() % 3 + 1;
+				//randNo = 1;
+				newChest = false;
+				//cout << "Your randNo is " << randNo << endl;
+			}
+			player.powerUp = randNo;
+			chest.setPosition(-50, -50);
+		}
+
+		if(randNo == 1)
+		{
+			swordPowerUp.setPosition(450, 400);
+			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+			{
+				cout << "Working " << randNo << endl;
+				swordPowerUp.setColor(Color::Transparent);
+				//swordPowerUp.setPosition (-50,-50);
+				//powerUp = 1;
+			}
+		}
+		else if(randNo == 3)
+		{
+			bowPowerUp.setPosition(450, 400);
+			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+			{
+				cout << "Working " << randNo << endl;
+				bowPowerUp.setColor(Color::Transparent);
+				//bowPowerUp.setPosition (-50,-50);
+				//powerUp = 2;
+			}
+		}
+		else if(randNo == 2)
+		{
+			spellPowerUp.setPosition(450, 400);
+			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+			{
+				cout << "Working " << randNo << endl;
+				spellPowerUp.setColor(Color::Transparent);
+				//spellPowerUp.setPosition (-50,-50);
+				//powerUp = 3;
+			
+			}
+		}
+	
+		player.Update(deltaTime, &playerTexture, sf::Vector2u(6,5), 0.3f, 200.0f);
+		player.View(window);
+		window.draw(healthPotion);
+		window.draw(chest);
+		window.draw(swordPowerUp);
+		window.draw(spellPowerUp);
+		window.draw(bowPowerUp);
+		window.draw(health);
+		player.Draw(window);
+		wolf.Draw(window);
+
+		//cout << powerUp << player.powerUp << endl;
+		//window.draw(gameCharacter.GetSprite());
+		//cout << powerUpDisplay << endl;
+
+		if (weaponActive && player.powerUp == 2 && !canShoot)
+		{
+			fireBall.setPosition(fireBallLocation.x,fireBallLocation.y);
+			window.draw(fireBall);
+			if (animationClock.getElapsedTime().asSeconds() > animationDelay)
+			{
+				fireBallLocation.x = fireBallLocation.x + 50;
+				animationClock.restart();
+			}
+			if (fireBallLocation.x > player.mainCharacter.getPosition().x+400)
+			{
+				//fireBall.setPosition(fireBallLocation.x,fireBallLocation.y);
+				canShoot = true;
+				//weaponActive = false;
 			}
 		}
 
+		if (weaponActive && player.powerUp == 3)
+		{
+			arrow.setPosition(arrowLocation.x,arrowLocation.y);
+			window.draw(arrow);
+			if (animationClock.getElapsedTime().asSeconds() > animationDelay)
+			{
+				arrowLocation.x = arrowLocation.x + 50;
+				animationClock.restart();
+			}
+			if (arrowLocation.x > player.mainCharacter.getPosition().x+400)
+			{
+				//arrow.setPosition(arrowLocation.x,arrowLocation.y);
+				canShoot = true;
+				weaponActive = false;
+			}
+		}
+		//cout << canShoot << endl;
+	}
+	else if (CURRENT_SCREEN == GAME_OVER_SCREEN)
+	{
+		//window.draw(GameOverMenu);
+		if (Keyboard::isKeyPressed(Keyboard::Return))
+		{
+			CURRENT_SCREEN = LEVEL_1_SCREEN;
+		}
+	}
 		window.display();
 	}
 	return 0;

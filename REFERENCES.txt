@@ -2,7 +2,7 @@ GameScreen background - https://www.shutterstock.com/image-illustration/mysterio
 Play/Exit Buttons - https://dabuttonfactory.com/
 MainCharacter Animations - https://rvros.itch.io/animated-pixel-hero
 Fantasy icons pack - https://shikashiassets.itch.io/shikashis-fantasy-icons-pack
-
+Wolf animation - https://pipoya.itch.io/pipoya-free-2d-game-character-sprites?download
 
 
 Text colour
