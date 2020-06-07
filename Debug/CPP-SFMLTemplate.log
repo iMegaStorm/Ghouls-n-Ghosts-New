@@ -1,0 +1,22 @@
+﻿Build started 07/06/2020 02:13:12.
+     1>Project "C:\Users\lukej\Downloads\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\CPP-SFMLTemplate\CPP-SFMLTemplate.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\SFML v2.4.0 (Win32 - Visual Studio 2012)\include" /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         main.cpp
+     1>c:\users\lukej\downloads\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\cpp-sfmltemplate\main.cpp(58): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\lukej\downloads\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\cpp-sfmltemplate\main.cpp(97): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\lukej\downloads\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\cpp-sfmltemplate\main.cpp(145): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>c:\users\lukej\downloads\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\cpp-sfmltemplate\main.cpp(259): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>c:\users\lukej\downloads\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\cpp-sfmltemplate\main.cpp(289): warning C4305: '=' : truncation from 'int' to 'bool'
+     1>c:\users\lukej\downloads\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\ghouls-n-ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\cpp-sfmltemplate\main.cpp(300): warning C4305: '=' : truncation from 'int' to 'bool'
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\lukej\Downloads\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Debug\Ghouls n Ghosts.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\SFML v2.4.0 (Win32 - Visual Studio 2012)\lib" "sfml-system-d.lib" "sfml-graphics-d.lib" "sfml-audio-d.lib" "sfml-network-d.lib" "sfml-window-d.lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\lukej\Downloads\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Debug\Ghouls n Ghosts.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\lukej\Downloads\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Debug\Ghouls n Ghosts.lib" /MACHINE:X86 Debug\Animation.obj
+         Debug\Enemies.obj
+         Debug\main.obj
+         Debug\Player.obj
+         CPP-SFMLTemplate.vcxproj -> C:\Users\lukej\Downloads\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Debug\Ghouls n Ghosts.exe
+     1>Done Building Project "C:\Users\lukej\Downloads\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\Ghouls-n-Ghosts-eb75c3014d018d57704a082b85d96cd68ec69917\CPP-SFMLTemplate\CPP-SFMLTemplate.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:07.32
