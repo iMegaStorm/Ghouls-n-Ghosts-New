@@ -2,6 +2,8 @@
 #include <iostream>
 #include <SFML\Graphics.hpp>
 
+
+
 class Enemies
 {
 public:
@@ -11,7 +13,9 @@ public:
 	int maxHealth;
 	sf::Texture enemyText;
 	sf::Vector2f enemySpeed;
+	
 
+public:
 
 
 	Enemies(void);
@@ -22,6 +26,7 @@ class Wolf : public Enemies
 {
 public:
 	void Wolf::Draw(sf::RenderWindow& window);
+	void Wolf::Spawner(sf::Clock& clock, sf::RenderWindow& window);
 
 	sf::Sprite wolf;
 	

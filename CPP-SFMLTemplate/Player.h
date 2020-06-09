@@ -2,6 +2,7 @@
 #include <SFML\Graphics.hpp>
 #include "Animation.h"
 #include <iostream>
+#include "Enemies.h"
 
 class Player
 {
@@ -34,6 +35,9 @@ public:
 	bool cantMove;
 	bool canShoot;
 	bool canAttack;
+	bool notShooting;
+	bool gravity;
+	bool gameOver;
 
 	sf::Sprite mainCharacterSprite;
 

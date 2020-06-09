@@ -54,6 +54,8 @@ bool weaponActive = false;
 	cout<<'\n';
 }*/
 
+
+
 void spawnGrass(int tileGrass, int tilePositionX, int tilePositionY, Sprite tiles[1])
 {
 	Sprite grass = tiles[tileGrass = 0];
@@ -68,7 +70,7 @@ Sprite &healthPotion, Sprite &chest, Sprite &grass, Sprite &fireBall, Sprite &ar
 
 	instructionMenu = init.LoadSpriteFromTexture("Assets/Menus/", "InstructionsMenu", "png");
 
-	background = init.LoadSpriteFromTexture("Assets/Menus/", "BackGround2", "png");
+	background = init.LoadSpriteFromTexture("Assets/Menus/", "BackGround", "png");
 	background.setPosition(0,-28);
 
 	playButton = init.LoadSpriteFromTexture("Assets/Menus/", "playButton", "png");
@@ -127,6 +129,8 @@ int main()
 
 	int currentHealth = 3;
 	bool canShoot = true;
+	bool canShootRight;
+	bool canShootLeft;
 	bool newChest = true;
 
 	Sprite gameScreen, playButton, exitButton, startButton, instructionMenu, background, health, healthPotion, chest, grass, fireBall, arrow, swordPowerUp, spellPowerUp, bowPowerUp;
@@ -134,7 +138,7 @@ int main()
 
 	sf::Texture playerTexture;
 	playerTexture.loadFromFile("Assets/Main Character/MainCharacterSheet.png");
-	Player player(&playerTexture, sf::Vector2u(6,6), 0.3f, 100.0f, 100.0f, sf::Vector2f(100.0f, 475.0f), 200);
+	Player player(&playerTexture, sf::Vector2u(6,6), 0.3f, 100.0f, 150.0f, sf::Vector2f(100.0f, 475.0f), 200);
 
 	
 	float deltaTime = 0.0f;
@@ -211,16 +215,49 @@ Sprite tiles[1] = {grass};
 						{
 						canShoot = false;
 						weaponActive = true;
-						fireBallLocation.x = player.GetPosition().x -50;
-						fireBallLocation.y = player.GetPosition().y +20;
+						player.notShooting = false; //After firing right/left once turning into the opposite direction would freeze the animation, this prevents that by locking the player into the animation
+						if(player.faceRight == true)
+						{
+							fireBallLocation.x = player.GetPosition().x +20;
+							fireBallLocation.y = player.GetPosition().y +30;
+							fireBall.setRotation(0); //Sets fireBall direction to face right
+							canShootRight = true; //Prevents being able to spam left to right 
+							canShootLeft = false; //Prevents being able to spam left to right 
+							cout << fireBallLocation.x << " /  " << fireBallLocation.y << endl;
+						}
+						else if(player.faceRight == false)
+						{
+							fireBallLocation.x = player.GetPosition().x +10;
+							fireBallLocation.y = player.GetPosition().y +60;
+							fireBall.setRotation(180); //Sets fireBall direction to face left
+							canShootRight = false;  //Prevents being able to spam left to right 
+							canShootLeft = true; //Prevents being able to spam left to right 
+							cout << fireBallLocation.x << " /  " << fireBallLocation.y << endl;
+						}
 						fireBall.setPosition(player.mainCharacter.getPosition());
 						}
 					else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && canShoot && player.powerUp == 3 && player.canAttack && player.cantMove == false) //The <Control> Keyboard Key Is Pressed...
 						{
 						canShoot = false;
 						weaponActive = true;
-						arrowLocation.x = player.GetPosition().x;
-						arrowLocation.y = player.GetPosition().y +27;
+						player.notShooting = false; //After firing right/left once turning into the opposite direction would freeze the animation, this prevents that by locking the player into the animation
+						if(player.faceRight == true)
+						{
+							arrowLocation.x = player.GetPosition().x;
+							arrowLocation.y = player.GetPosition().y +27;
+							arrow.setRotation(0); //Sets fireBall direction to face right
+							canShootRight = true; //Prevents being able to spam left to right 
+							canShootLeft = false; //Prevents being able to spam left to right 
+						}
+						else if(player.faceRight == false)
+						{
+							arrowLocation.x = player.GetPosition().x +30;
+							arrowLocation.y = player.GetPosition().y +77;
+							arrow.setRotation(180); //Sets arrow direction to face left
+							canShootRight = false;  //Prevents being able to spam left to right 
+							canShootLeft = true; //Prevents being able to spam left to right
+							cout << "1" << endl;
+						}
 						arrow.setPosition(player.mainCharacter.getPosition());
 						}
 				}			
@@ -241,9 +278,7 @@ Sprite tiles[1] = {grass};
 	}
 	else if (CURRENT_SCREEN == LEVEL_1_SCREEN)
 	{
-		//window.draw(background);
-		//player.Draw(window);
-		//wolf.Draw(window);
+		window.draw(background);
 
 		for(i = 0; i<20; i++) 
 		{
@@ -261,9 +296,9 @@ Sprite tiles[1] = {grass};
 			for(i = 0; i < 1; i++)
 			{
 				srand(time(NULL));
-				randNo = rand() % 3 + 1;
-				//randNo = 1;
+				//randNo = rand() % 3 + 1;
 				newChest = false;
+				randNo = 3;
 				//cout << "Your randNo is " << randNo << endl;
 			}
 			player.powerUp = randNo;
@@ -275,7 +310,7 @@ Sprite tiles[1] = {grass};
 			swordPowerUp.setPosition(450, 400);
 			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 			{
-				cout << "Working " << randNo << endl;
+				//cout << "Working " << randNo << endl;
 				swordPowerUp.setColor(Color::Transparent);
 				//swordPowerUp.setPosition (-50,-50);
 				//powerUp = 1;
@@ -286,7 +321,7 @@ Sprite tiles[1] = {grass};
 			bowPowerUp.setPosition(450, 400);
 			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 			{
-				cout << "Working " << randNo << endl;
+				//cout << "Working " << randNo << endl;
 				bowPowerUp.setColor(Color::Transparent);
 				//bowPowerUp.setPosition (-50,-50);
 				//powerUp = 2;
@@ -297,11 +332,126 @@ Sprite tiles[1] = {grass};
 			spellPowerUp.setPosition(450, 400);
 			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 			{
-				cout << "Working " << randNo << endl;
+				//cout << "Working " << randNo << endl;
 				spellPowerUp.setColor(Color::Transparent);
 				//spellPowerUp.setPosition (-50,-50);
 				//powerUp = 3;
-			
+			}
+		}
+
+		//Healing potion
+		if(player.mainCharacter.getGlobalBounds().intersects(healthPotion.getGlobalBounds()) && player.currentHealth < 10 && player.currentHealth > 0)
+		{
+			if(player.currentHealth < 10 && player.currentHealth > 7)
+			{
+				player.currentHealth = player.maxHealth; //If player health is 8 or 9 then set it to 10
+			}
+			else if(player.currentHealth <= 7)
+			{
+				player.currentHealth += 3;
+			}
+			else if(player.currentHealth > 0 && player.currentHealth < 7)
+			{
+				player.currentHealth += 3;
+			}
+			healthPotion.setPosition(-50,-50);
+		}
+
+		//Combat
+		if(player.mainCharacter.getGlobalBounds().intersects(wolf.wolf.getGlobalBounds()) && wolf.currentHealth > 0 && player.row != 2)
+		{
+			player.currentHealth -=1;
+			//player.mainCharacter.setPosition(player.mainCharacter.getPosition().x-50, player.mainCharacter.getPosition().y);
+			std::cout << "Player health: " << player.currentHealth << " COLLISION" << std::endl;
+		}
+		else if(player.mainCharacter.getGlobalBounds().intersects(wolf.wolf.getGlobalBounds()) && player.row == 2)
+		{
+			wolf.currentHealth -=1;
+			//remove if you remove swords from the game
+		}
+
+		if(weaponActive && player.powerUp == 2 && !canShoot)
+		{
+			fireBall.setPosition(fireBallLocation.x,fireBallLocation.y);
+			window.draw(fireBall);
+			if(player.faceRight == true && canShootRight == true && canShootLeft == false)
+			{
+				if(animationClock.getElapsedTime().asSeconds() > animationDelay)
+				{
+					fireBallLocation.x = fireBallLocation.x + 50;
+					animationClock.restart();
+				}
+				if(fireBallLocation.x > player.mainCharacter.getPosition().x +400)
+				{
+					canShoot = true; //If the fireBall has travelled the distance the player can fire again
+					player.notShooting = true; //If the fireBall has travelled the distance the player can change direction
+					cout << player.faceRight << " / " << "Active" << endl;
+				}
+			}
+			else if(player.faceRight == false && canShootRight == false && canShootLeft == true)
+			{
+				if(animationClock.getElapsedTime().asSeconds() > animationDelay)
+				{
+					fireBallLocation.x = fireBallLocation.x - 50;
+					animationClock.restart();
+				}
+				if(fireBallLocation.x < player.mainCharacter.getPosition().x -400 && player.faceRight == false)
+				{
+					cout << player.faceRight << " / " << "False" << endl;
+					canShoot = true; //If the fireBall has travelled the distance the player can fire again
+					player.notShooting = true;; //If the fireBall has travelled the distance the player can change direction
+				}
+			}			
+			if(fireBall.getGlobalBounds().intersects(wolf.wolf.getGlobalBounds()) && wolf.currentHealth > 0)
+			{
+				canShoot = true;
+				player.notShooting = true; //if contact with the enemy npc is made, the player can change direction
+				wolf.currentHealth -=1;
+				fireBall.setPosition(player.mainCharacter.getPosition());
+				cout << wolf.currentHealth << endl;
+			}
+		}
+
+		if (weaponActive && player.powerUp == 3 && !canShoot)
+		{
+			arrow.setPosition(arrowLocation.x,arrowLocation.y);
+			window.draw(arrow);
+			if(player.faceRight == true && canShootRight == true && canShootLeft == false)
+			{
+				if (animationClock.getElapsedTime().asSeconds() > animationDelay)
+				{
+					arrowLocation.x = arrowLocation.x + 50;
+					animationClock.restart();
+				}
+				if (arrowLocation.x > player.mainCharacter.getPosition().x +400)
+				{
+					canShoot = true;
+					player.notShooting = true;
+				}
+			}
+			else if(player.faceRight == false && canShootRight == false && canShootLeft == true)
+			{
+				cout << "2" << endl;
+				if (animationClock.getElapsedTime().asSeconds() > animationDelay)
+				{
+					arrowLocation.x = arrowLocation.x - 50;
+					animationClock.restart();
+					cout << "3" << endl;
+				}
+				if (arrowLocation.x < player.mainCharacter.getPosition().x -400 && player.faceRight == false)
+				{
+					canShoot = true;
+					player.notShooting = true;
+					cout << "4" << endl;
+				}
+			}
+			if (arrow.getGlobalBounds().intersects(wolf.wolf.getGlobalBounds()) && wolf.currentHealth > 0)
+			{
+				canShoot = true;
+				player.notShooting = true;
+				wolf.currentHealth -=1;
+				arrow.setPosition(player.mainCharacter.getPosition());
+				cout << wolf.currentHealth << endl;
 			}
 		}
 	
@@ -313,46 +463,11 @@ Sprite tiles[1] = {grass};
 		window.draw(spellPowerUp);
 		window.draw(bowPowerUp);
 		window.draw(health);
-		player.Draw(window);
 		wolf.Draw(window);
+		wolf.Spawner(clock, window);
+		player.Draw(window);
 
-		//cout << powerUp << player.powerUp << endl;
-		//window.draw(gameCharacter.GetSprite());
-		//cout << powerUpDisplay << endl;
-
-		if (weaponActive && player.powerUp == 2 && !canShoot)
-		{
-			fireBall.setPosition(fireBallLocation.x,fireBallLocation.y);
-			window.draw(fireBall);
-			if (animationClock.getElapsedTime().asSeconds() > animationDelay)
-			{
-				fireBallLocation.x = fireBallLocation.x + 50;
-				animationClock.restart();
-			}
-			if (fireBallLocation.x > player.mainCharacter.getPosition().x+400)
-			{
-				//fireBall.setPosition(fireBallLocation.x,fireBallLocation.y);
-				canShoot = true;
-				//weaponActive = false;
-			}
-		}
-
-		if (weaponActive && player.powerUp == 3)
-		{
-			arrow.setPosition(arrowLocation.x,arrowLocation.y);
-			window.draw(arrow);
-			if (animationClock.getElapsedTime().asSeconds() > animationDelay)
-			{
-				arrowLocation.x = arrowLocation.x + 50;
-				animationClock.restart();
-			}
-			if (arrowLocation.x > player.mainCharacter.getPosition().x+400)
-			{
-				//arrow.setPosition(arrowLocation.x,arrowLocation.y);
-				canShoot = true;
-				weaponActive = false;
-			}
-		}
+	
 		//cout << canShoot << endl;
 	}
 	else if (CURRENT_SCREEN == GAME_OVER_SCREEN)
