@@ -2,20 +2,23 @@
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "Initialise.h"
 #include "Player.h"
 #include "Enemies.h"
+
 
 //Compiler Directives
 using namespace std;
 
 RenderWindow window(VideoMode(800, 600), "Ghouls 'n Ghosts"); // 13 squares wide, 9 square high
 //sf::View view;
-
+//
+//extern Wolf wolves[4]; //wew  , well i have to go in sleep xd 
 
 Initialise init;
-Enemies enemies;
-Wolf wolf;
+Dragon dragons[3];
+Wolf wolves[3];
 
 //Game Screen Variables
 	//Assigns a value for each screen
@@ -23,38 +26,14 @@ const int GAME_MENU_SCREEN = 0; //Main game screen
 const int INSTRUCTIONS_MENU_SCREEN = 1; //Instructions Menu screen
 const int LEVEL_1_SCREEN = 2; // Level 1 of the game
 const int GAME_OVER_SCREEN = 3; //Game Over screen
-int CURRENT_SCREEN = LEVEL_1_SCREEN; //Using current screen in order to switch to another screen
-int level = 1; 
-int offsetX = 0;
-int offsetY = 0;
+int CURRENT_SCREEN = 0; //Using current screen in order to switch to another screen
 
 Vector2i MouseCursorLocation(0,0);
-
 sf::Vector2f fireBallLocation(10,520);
 sf::Vector2f arrowLocation(10,520);
 
+
 bool weaponActive = false;
-
-/*void drawDebugLayout(int playField[20][50]) {
-	for (int i = 0; i < 15; i++)
-    {
-        cout<<  endl;
-	}
-
-
-	int i, j;
-	for(i=0; i<20; i++)
-	{
-		for(j=0; j<50; j++)
-		{
-			cout<<playField[i][j]<<' ';	
-		}
-		cout<<'\n';
-	}
-	cout<<'\n';
-}*/
-
-
 
 void spawnGrass(int tileGrass, int tilePositionX, int tilePositionY, Sprite tiles[1])
 {
@@ -63,7 +42,7 @@ void spawnGrass(int tileGrass, int tilePositionX, int tilePositionY, Sprite tile
 	window.draw(grass);
 }
 
-void Init (Sprite &gameScreen, Sprite &playButton, Sprite &exitButton, Sprite &startButton, Sprite &instructionMenu,Sprite &background, Sprite &health,
+void Init (Sprite &gameScreen, Sprite &playButton, Sprite &exitButton, Sprite &startButton, Sprite &instructionMenu,Sprite &background,
 Sprite &healthPotion, Sprite &chest, Sprite &grass, Sprite &fireBall, Sprite &arrow, Sprite &swordPowerUp, Sprite &spellPowerUp, Sprite &bowPowerUp)
 {
 	gameScreen = init.LoadSpriteFromTexture("Assets/Menus/", "GameScreen", "png");
@@ -84,9 +63,6 @@ Sprite &healthPotion, Sprite &chest, Sprite &grass, Sprite &fireBall, Sprite &ar
 	startButton = init.LoadSpriteFromTexture("Assets/Menus/", "startButton", "png");
 	startButton.setOrigin (100.0/2, 42.0/2);
 	startButton.setPosition (400, 550);
-
-	health = init.LoadSpriteFromTexture("Assets/Objects/", "Health", "png");
-	health.setPosition(50, 50);
 	
 	healthPotion = init.LoadSpriteFromTexture("Assets/Objects/", "HealthPotion", "png");
 	healthPotion.setPosition (400, 544);
@@ -115,6 +91,54 @@ Sprite &healthPotion, Sprite &chest, Sprite &grass, Sprite &fireBall, Sprite &ar
 	bowPowerUp.setPosition(-50, -50); 
 }
 
+void EnemyClock(sf::Clock& enemyClock, sf::Clock& dragClock)
+{
+		float dt = enemyClock.getElapsedTime().asSeconds();
+		float dragDeltaTime = dragClock.getElapsedTime().asSeconds();
+		float frequency = 2.5f;
+		float amplitude = 5.0f;
+		int distance = 10;
+
+	for(int i = 0; i < 3; i++)
+	{	
+			wolves[i].wolf.setPosition(wolves[i].x, wolves[i].y);
+			dragons[i].dragon.setPosition(dragons[i].x,dragons[i].y);
+
+			if(wolves[i].currentHealth > 0)
+			{
+				wolves[i].enemySpeed = Vector2f(0.8, 0);
+			}
+			else
+			{
+				wolves[i].enemySpeed = Vector2f(0, 0);
+			}
+			wolves[i].x -=   6 * (wolves[i].enemySpeed.x * dt);
+
+		if(dragons[i].currentHealth > 0)
+		{
+			abs(dragons[i].x += distance *(-0.05 * dragDeltaTime)); //Separate clock as i want the dragons to not reset
+			abs(dragons[i].y += (sin(frequency * dragDeltaTime) * amplitude));
+		}
+		else
+		{
+			dragons[i].dragon.setColor(Color::Transparent);
+		}
+
+		if(dt >= 1.5)
+		{
+			enemyClock.restart();
+
+			if(wolves[0].currentHealth > 0)
+				wolves[0].x = 800;
+			if (wolves[1].currentHealth > 0)
+				wolves[1].x = 1600;
+			if (wolves[2].currentHealth > 0)
+				wolves[2].x = 3200;
+		}
+		//cout << dt << " / " << enemyClock.getElapsedTime().asSeconds() << endl;
+	}
+}
+
 int main()
 {
 //Local Variables
@@ -122,9 +146,34 @@ int main()
 	Event event;
 	//Local Variables
 	Clock ClockTime;
+	Clock animationClock;
+	Clock enemyClock;
+	Clock dragClock;
+	Clock clock;
 	Time speed;
 
-	sf::Clock animationClock;
+	sf::Music music;
+	music.openFromFile("Assets/Audio/ForestMusic.ogg");
+	music.setLoop(true);
+	music.play();
+
+	Sprite gameScreen, playButton, exitButton, startButton, instructionMenu, background, healthPotion, chest, grass, fireBall, arrow, swordPowerUp, spellPowerUp, bowPowerUp;
+	Init(gameScreen, playButton, exitButton, startButton, instructionMenu, background, healthPotion, chest, grass, fireBall, arrow, swordPowerUp, spellPowerUp, bowPowerUp);
+
+	wolves[0].x = 800;
+	wolves[0].y = 555;
+	wolves[1].x = 1600;
+	wolves[1].y = 555;
+	wolves[2].x = 3200;
+	wolves[2].y = 555;
+
+	dragons[0].x = 1000;
+	dragons[0].y = 400;
+	dragons[1].x = 2000;
+	dragons[1].y = 400;
+	dragons[2].x = 4000;
+	dragons[2].y = 400;
+
 	float animationDelay = 0.04f;
 
 	int currentHealth = 3;
@@ -132,22 +181,15 @@ int main()
 	bool canShootRight;
 	bool canShootLeft;
 	bool newChest = true;
-
-	Sprite gameScreen, playButton, exitButton, startButton, instructionMenu, background, health, healthPotion, chest, grass, fireBall, arrow, swordPowerUp, spellPowerUp, bowPowerUp;
-	Init(gameScreen, playButton, exitButton, startButton, instructionMenu, background, health, healthPotion, chest, grass, fireBall, arrow, swordPowerUp, spellPowerUp, bowPowerUp);
-
-	sf::Texture playerTexture;
-	playerTexture.loadFromFile("Assets/Main Character/MainCharacterSheet.png");
-	Player player(&playerTexture, sf::Vector2u(6,6), 0.3f, 100.0f, 150.0f, sf::Vector2f(100.0f, 475.0f), 200);
-
-	
 	float deltaTime = 0.0f;
-	sf::Clock clock;
+
+	sf::Texture playerTexture, dragonTexture;
+	playerTexture.loadFromFile("Assets/Main Character/MainCharacterSheet.png");
+	Player player(&playerTexture, sf::Vector2u(6,6), 0.3f, 100.0f, 150.0f, sf::Vector2f(100.0f, 475.0f));
 
 	window.setFramerateLimit(60);
 	
-
-	int i, j;
+	//int i, j;
 	srand(time(NULL));
 	int playField[20][58] =
 	{
@@ -175,7 +217,7 @@ int main()
 	//drawDebugLayout(playField);
 
 
-Sprite tiles[1] = {grass};
+	Sprite tiles[1] = {grass};
 	
 	while (window.isOpen()) //The Game Window Loop
 	{
@@ -264,25 +306,31 @@ Sprite tiles[1] = {grass};
 		}
 		//cout << sf::Keyboard::isKeyPressed(sf::Keyboard::Space) << "/" << player.powerUp << "/" << player.canAttack << "/" << player.cantMove << endl;
 	window.clear();
+	
 
 	if (CURRENT_SCREEN == GAME_MENU_SCREEN)
 	{
 		window.draw(gameScreen);
 		window.draw(playButton);
 		window.draw(exitButton);
+
+	/*	cout << "Dragon[0] " << abs(dragons[0].x) << " / " << abs(dragons[0].y) << endl;
+		cout << "Dragon[1] " << abs(dragons[1].x) << " / " << abs(dragons[1].y) << endl;
+		cout << "Dragon[2] " << abs(dragons[2].x) << " / " << abs(dragons[2].y) << endl;*/
 	}
 	else if (CURRENT_SCREEN == INSTRUCTIONS_MENU_SCREEN)
 	{
 		window.draw(instructionMenu);
 		window.draw(startButton);
+
 	}
 	else if (CURRENT_SCREEN == LEVEL_1_SCREEN)
 	{
 		window.draw(background);
 
-		for(i = 0; i<20; i++) 
+		for(int i = 0; i<20; i++) 
 		{
-			for(j = 0; j<58; j++)
+			for(int j = 0; j<58; j++)
 			{
 				if(playField[i][j] == 2)
 				{
@@ -291,9 +339,9 @@ Sprite tiles[1] = {grass};
 			}
 		}
 		int randNo;
-		if (player.Intersects(chest,0, 0, false) && sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && newChest)
+		if (player.mainCharacter.getGlobalBounds().intersects(chest.getGlobalBounds(), player.mainCharacter.getGlobalBounds()) && sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && newChest)
 		{
-			for(i = 0; i < 1; i++)
+			for(int i = 0; i < 1; i++)
 			{
 				srand(time(NULL));
 				//randNo = rand() % 3 + 1;
@@ -310,10 +358,7 @@ Sprite tiles[1] = {grass};
 			swordPowerUp.setPosition(450, 400);
 			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 			{
-				//cout << "Working " << randNo << endl;
 				swordPowerUp.setColor(Color::Transparent);
-				//swordPowerUp.setPosition (-50,-50);
-				//powerUp = 1;
 			}
 		}
 		else if(randNo == 3)
@@ -321,10 +366,7 @@ Sprite tiles[1] = {grass};
 			bowPowerUp.setPosition(450, 400);
 			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 			{
-				//cout << "Working " << randNo << endl;
 				bowPowerUp.setColor(Color::Transparent);
-				//bowPowerUp.setPosition (-50,-50);
-				//powerUp = 2;
 			}
 		}
 		else if(randNo == 2)
@@ -332,10 +374,7 @@ Sprite tiles[1] = {grass};
 			spellPowerUp.setPosition(450, 400);
 			if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 			{
-				//cout << "Working " << randNo << endl;
 				spellPowerUp.setColor(Color::Transparent);
-				//spellPowerUp.setPosition (-50,-50);
-				//powerUp = 3;
 			}
 		}
 
@@ -358,16 +397,20 @@ Sprite tiles[1] = {grass};
 		}
 
 		//Combat
-		if(player.mainCharacter.getGlobalBounds().intersects(wolf.wolf.getGlobalBounds()) && wolf.currentHealth > 0 && player.row != 2)
+		for(int i = 0; i < 3; i++)
 		{
-			player.currentHealth -=1;
-			//player.mainCharacter.setPosition(player.mainCharacter.getPosition().x-50, player.mainCharacter.getPosition().y);
-			std::cout << "Player health: " << player.currentHealth << " COLLISION" << std::endl;
-		}
-		else if(player.mainCharacter.getGlobalBounds().intersects(wolf.wolf.getGlobalBounds()) && player.row == 2)
-		{
-			wolf.currentHealth -=1;
-			//remove if you remove swords from the game
+			if(player.mainCharacter.getGlobalBounds().intersects(wolves[i].wolf.getGlobalBounds()) && wolves[i].currentHealth > 0)
+			{ 
+				player.currentHealth -=1;
+				player.mainCharacter.setPosition(player.mainCharacter.getPosition().x-50, player.mainCharacter.getPosition().y);
+				std::cout << "Player health: " << player.currentHealth << " COLLISION" << std::endl;
+			}
+			if(player.mainCharacter.getGlobalBounds().intersects(dragons[i].dragon.getGlobalBounds()) && dragons[i].currentHealth > 0)
+			{ 
+				player.currentHealth -=1;
+				player.mainCharacter.setPosition(player.mainCharacter.getPosition().x-50, player.mainCharacter.getPosition().y);
+				std::cout << "Player health: " << player.currentHealth << " COLLISION" << std::endl;
+			}
 		}
 
 		if(weaponActive && player.powerUp == 2 && !canShoot)
@@ -401,14 +444,24 @@ Sprite tiles[1] = {grass};
 					canShoot = true; //If the fireBall has travelled the distance the player can fire again
 					player.notShooting = true;; //If the fireBall has travelled the distance the player can change direction
 				}
-			}			
-			if(fireBall.getGlobalBounds().intersects(wolf.wolf.getGlobalBounds()) && wolf.currentHealth > 0)
+			}
+			for(int i = 0; i < 3; i++)
 			{
-				canShoot = true;
-				player.notShooting = true; //if contact with the enemy npc is made, the player can change direction
-				wolf.currentHealth -=1;
-				fireBall.setPosition(player.mainCharacter.getPosition());
-				cout << wolf.currentHealth << endl;
+				if(fireBall.getGlobalBounds().intersects(wolves[i].wolf.getGlobalBounds()) && wolves[i].currentHealth > 0)
+				{
+					canShoot = true;
+					player.notShooting = true; //if contact with the enemy npc is made, the player can change direction
+					wolves[i].currentHealth -=1;
+					fireBall.setPosition(player.mainCharacter.getPosition());
+					cout << wolves[i].currentHealth << endl;
+				} 
+				else if(fireBall.getGlobalBounds().intersects(dragons[i].dragon.getGlobalBounds()) && dragons[i].currentHealth > 0)
+				{
+					canShoot = true;
+					player.notShooting = true; //if contact with the enemy npc is made, the player can change direction
+					dragons[i].currentHealth -=1;
+					fireBall.setPosition(player.mainCharacter.getPosition());
+				}
 			}
 		}
 
@@ -445,16 +498,26 @@ Sprite tiles[1] = {grass};
 					cout << "4" << endl;
 				}
 			}
-			if (arrow.getGlobalBounds().intersects(wolf.wolf.getGlobalBounds()) && wolf.currentHealth > 0)
+			for(int i = 0; i < 3; i++)
 			{
-				canShoot = true;
-				player.notShooting = true;
-				wolf.currentHealth -=1;
-				arrow.setPosition(player.mainCharacter.getPosition());
-				cout << wolf.currentHealth << endl;
+				if (arrow.getGlobalBounds().intersects(wolves[i].wolf.getGlobalBounds()) && wolves[i].currentHealth > 0) 
+				{
+					canShoot = true;
+					player.notShooting = true;
+					wolves[i].currentHealth -=1;
+					arrow.setPosition(player.mainCharacter.getPosition());
+					cout << wolves[i].currentHealth << endl;
+				}
+				else if(arrow.getGlobalBounds().intersects(dragons[i].dragon.getGlobalBounds()) && dragons[i].currentHealth > 0)
+				{
+					canShoot = true;
+					player.notShooting = true; //if contact with the enemy npc is made, the player can change direction
+					dragons[i].currentHealth -=1;
+					arrow.setPosition(player.mainCharacter.getPosition());
+				}
 			}
 		}
-	
+
 		player.Update(deltaTime, &playerTexture, sf::Vector2u(6,5), 0.3f, 200.0f);
 		player.View(window);
 		window.draw(healthPotion);
@@ -462,12 +525,27 @@ Sprite tiles[1] = {grass};
 		window.draw(swordPowerUp);
 		window.draw(spellPowerUp);
 		window.draw(bowPowerUp);
-		window.draw(health);
-		wolf.Draw(window);
-		wolf.Spawner(clock, window);
+		EnemyClock(clock, dragClock);
+		cout << "Dragon[0] " << abs(dragons[0].x) << " / " << abs(dragons[0].y) << endl;
+		cout << "Dragon[1] " << abs(dragons[1].x) << " / " << abs(dragons[1].y) << endl;
+		cout << "Dragon[2] " << abs(dragons[2].x) << " / " << abs(dragons[2].y) << endl;
+
+		for(int i = 0; i < 3; i++)
+		{
+			wolves[i].Update();
+			wolves[i].Draw(window);
+			dragons[i].Update();
+			dragons[i].Draw(window);
+			
+
+			if(dragons[i].currentHealth <= 0)
+			{
+				dragons[i].dragon.setPosition(dragons[i].dragon.getPosition().x, dragons[i].dragon.getPosition().y+10);
+			}
+		}
+		
 		player.Draw(window);
 
-	
 		//cout << canShoot << endl;
 	}
 	else if (CURRENT_SCREEN == GAME_OVER_SCREEN)

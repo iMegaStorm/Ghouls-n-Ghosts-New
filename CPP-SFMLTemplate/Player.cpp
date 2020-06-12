@@ -1,8 +1,6 @@
 #include "Player.h"
 
-Wolf enemyWolf;
-
-Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, float jumpHeight, sf::Vector2f Position, float Mass) :
+Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, float jumpHeight, sf::Vector2f Position) :
 	animation(texture, imageCount, switchTime)
 {
 		currentHealth = 10;
@@ -11,6 +9,7 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 		this->jumpHeight= jumpHeight;
 		row = 0;
 		faceRight = true;
+		dFaceRight;
 		cantMove;
 		canShoot;
 		canAttack;
@@ -23,6 +22,17 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 		mainCharacter.setOrigin(50/2,37/2);
 		mainCharacter.setPosition(Position);
 		mainCharacter.setTexture(texture);
+
+			maxHealth = 10;
+
+	hBOutline.setSize(sf::Vector2f(100,14));
+	hBOutline.setOrigin(50,14 - mainCharacter.getLocalBounds().height/2+70);
+	hBOutline.setFillColor(sf::Color (0, 0, 0)); //Setting the hBOutline to black
+	
+	
+	healthBar.setOrigin (49, 13  - mainCharacter.getLocalBounds().height/2+70); //Attaching the healthBar to the player
+	healthBar.setFillColor(sf::Color (118, 255, 3)); //Setting the healthBar to black
+	
 }
 
 Player::~Player(void)
@@ -57,6 +67,11 @@ void Player::View(sf::RenderWindow& window)
 
 void Player::Update(float deltaTime, sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed) 
 {
+
+	int width = currentHealth * 98 / maxHealth; //Calculates how much to draw
+	healthBar.setSize(sf::Vector2f (width, 12)); //Sets the size of the healthBar
+	hBOutline.setPosition (mainCharacter.getPosition().x+20, mainCharacter.getPosition().y); //Sets the position of the hBOutline and updates per frame
+	healthBar.setPosition (mainCharacter.getPosition().x+20, mainCharacter.getPosition().y); //Sets the position of the healthbar and updates per frame
 	//Local Variable
 	//bool cantMove = false;
 	velocity.x = 0.0f;
@@ -153,48 +168,23 @@ void Player::Update(float deltaTime, sf::Texture* texture, sf::Vector2u imageCou
 		row = 0; //943 change to dead animaton if included
 		gameOver = true;
 	}
+	if(mainCharacter.getPosition().x < 5)
+	{
+		mainCharacter.setPosition(6, mainCharacter.getPosition().y);
+	}
 	
+
 	//std::cout << cantMove << " / " << canAttack << std::endl;
-		animation.Update(row, deltaTime, faceRight);
+		animation.Update(row, 0, deltaTime, faceRight, dFaceRight);
 		mainCharacter.setTextureRect(animation.uvRect);
 		mainCharacter.move(velocity * deltaTime);
 }
 
-
-bool Player::Intersects(sf::Sprite sprite, int type, int randType, bool powerUpDisplay)
-{
-	if(mainCharacter.getGlobalBounds().intersects(sprite.getGlobalBounds())) 
-	{
-			powerUp = type;
-			return true;
-	}
-	if(randType > 0)
-	{
-		return true;
-	}
-	return false;
-}
-
 void Player::Draw(sf::RenderWindow& window)
 {
-	//currentHealth = maxHealth = 10;
-	maxHealth = 10;
-	sf::RectangleShape healthBar, hBOutline;
-	hBOutline.setSize(sf::Vector2f(100,14));
-	hBOutline.setOrigin(50,14 - mainCharacter.getLocalBounds().height/2+70);
-	hBOutline.setFillColor(sf::Color (0, 0, 0)); //Setting the hBOutline to black
-	hBOutline.setPosition (mainCharacter.getPosition().x+20, mainCharacter.getPosition().y); //Sets the position of the hBOutline
 	window.draw(hBOutline);
-
-	int width = currentHealth * 98 / maxHealth; //Calculates how much to draw
-	healthBar.setSize(sf::Vector2f (width, 12)); //Sets the size of the healthBar
-	healthBar.setOrigin (49, 13  - mainCharacter.getLocalBounds().height/2+70); //Attaching the healthBar to the car
-	healthBar.setFillColor(sf::Color (118, 255, 3)); //Setting the healthBar to black
-	healthBar.setPosition (mainCharacter.getPosition().x+20, mainCharacter.getPosition().y); //Sets the position of the healthBar
 	window.draw(healthBar);
-
-
-
+	
 	window.draw(mainCharacter);
 
 	//std::cout << currentHealth << " / " << maxHealth << std::endl;
