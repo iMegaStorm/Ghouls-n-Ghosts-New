@@ -41,6 +41,7 @@ public:
 	bool notShooting;
 	bool gravity;
 	bool gameOver;
+	bool gameWon;
 
 	sf::Sprite mainCharacterSprite;
 

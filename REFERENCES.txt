@@ -3,6 +3,7 @@ Play/Exit Buttons - https://dabuttonfactory.com/
 MainCharacter Animations - https://rvros.itch.io/animated-pixel-hero
 Fantasy icons pack - https://shikashiassets.itch.io/shikashis-fantasy-icons-pack
 Wolf animation - https://pipoya.itch.io/pipoya-free-2d-game-character-sprites?download
+Exit portal - https://pathofexile.gamepedia.com/Spirit_Portal_Effect
 
 
 Text colour

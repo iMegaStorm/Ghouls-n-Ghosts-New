@@ -6,33 +6,30 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 		currentHealth = 10;
 		maxHealth = 10;
 		this->speed = speed;
-		this->jumpHeight= jumpHeight;
+		this->jumpHeight = jumpHeight;
 		row = 0;
 		faceRight = true;
-		dFaceRight;
 		cantMove;
 		canShoot;
 		canAttack;
 		notShooting = true;
 		gravity;
 		gameOver = false;
-
+		gameWon = false;
+		x = 100;
+		y = 475;
 
 		mainCharacter.setSize(sf::Vector2f(94.0f,120.0f));
 		mainCharacter.setOrigin(50/2,37/2);
 		mainCharacter.setPosition(Position);
 		mainCharacter.setTexture(texture);
 
-			maxHealth = 10;
-
-	hBOutline.setSize(sf::Vector2f(100,14));
-	hBOutline.setOrigin(50,14 - mainCharacter.getLocalBounds().height/2+70);
-	hBOutline.setFillColor(sf::Color (0, 0, 0)); //Setting the hBOutline to black
+		hBOutline.setSize(sf::Vector2f(100,14));
+		hBOutline.setOrigin(50,14 - mainCharacter.getLocalBounds().height/2+70);
+		hBOutline.setFillColor(sf::Color(0, 0, 0)); //Setting the hBOutline to black
 	
-	
-	healthBar.setOrigin (49, 13  - mainCharacter.getLocalBounds().height/2+70); //Attaching the healthBar to the player
-	healthBar.setFillColor(sf::Color (118, 255, 3)); //Setting the healthBar to black
-	
+		healthBar.setOrigin(49, 13  - mainCharacter.getLocalBounds().height/2+70); //Attaching the healthBar to the player
+		healthBar.setFillColor(sf::Color(118, 255, 3)); //Setting the healthBar to black
 }
 
 Player::~Player(void)
@@ -45,22 +42,17 @@ void Player::View(sf::RenderWindow& window)
 	view.reset(sf::FloatRect(0, 0, 800, 600));
 	view.setCenter(mainCharacter.getPosition());
 	
-	if (mainCharacter.getPosition().x <= 400) 
+	if(mainCharacter.getPosition().x <= 400 || (gameWon || gameOver)) 
 	{
-		//std::cout << "Less than 400" << std::endl;
 		view.setCenter(400,300);
 	}
-	else if (mainCharacter.getPosition().x >= 1456) 
+	else if(mainCharacter.getPosition().x >= 1456 && !gameOver && !gameWon) 
 	{
-		//view.setCenter(550, y);
 		view.setCenter(1456,300);
-		//std::cout << "Greater than 1456" << std::endl;
 	}
 	else 
 	{
-		//std::cout << "Inbetween" << std::endl;
 		view.setCenter(mainCharacter.getPosition().x, 300);
-		//view.move(0,-175);
 	}
 		window.setView(view);
 }
@@ -69,11 +61,9 @@ void Player::Update(float deltaTime, sf::Texture* texture, sf::Vector2u imageCou
 {
 
 	int width = currentHealth * 98 / maxHealth; //Calculates how much to draw
-	healthBar.setSize(sf::Vector2f (width, 12)); //Sets the size of the healthBar
-	hBOutline.setPosition (mainCharacter.getPosition().x+20, mainCharacter.getPosition().y); //Sets the position of the hBOutline and updates per frame
-	healthBar.setPosition (mainCharacter.getPosition().x+20, mainCharacter.getPosition().y); //Sets the position of the healthbar and updates per frame
-	//Local Variable
-	//bool cantMove = false;
+	healthBar.setSize(sf::Vector2f(width, 12)); //Sets the size of the healthBar
+	hBOutline.setPosition(mainCharacter.getPosition().x+20, mainCharacter.getPosition().y); //Sets the position of the hBOutline and updates per frame
+	healthBar.setPosition(mainCharacter.getPosition().x+20, mainCharacter.getPosition().y); //Sets the position of the healthbar and updates per frame
 	velocity.x = 0.0f;
 	bool gravity = true;
 
@@ -82,34 +72,30 @@ void Player::Update(float deltaTime, sf::Texture* texture, sf::Vector2u imageCou
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && mainCharacter.getPosition().x > 5 && !cantMove && notShooting)
 		{
 			velocity.x -= speed;
-			//std::cout << mainCharacter.getPosition().x << std::endl;
+			velocity.x -= x;
 		}
 		else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) && mainCharacter.getPosition().x < 1809 && !cantMove && notShooting)
 		{
 			velocity.x += speed;
-			//std::cout << "Your X axis is: " << mainCharacter.getPosition().x << std::endl;
-			//std::cout << "Your Y axis is: " << mainCharacter.getPosition().y << std::endl;
+			velocity.x += x;
 		}
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && canJump)
 		{
-			//std::cout << "You're jumping " << gravity << "/" << velocity.y << std::endl;
 			canJump = false; //If you jump then you can't jump again
 			velocity.y = -sqrtf(2.0f * 981.0f * jumpHeight); // Velocity for the jump, square root(float) of 2.0f * gravity * jumpHeight
 		}
-		else if (mainCharacter.getPosition().y < 475.0f && gravity)
+		else if(mainCharacter.getPosition().y < 475.0f && gravity)
 		{
-			std::cout << "Gravity active " << gravity << "/" << velocity.y << std::endl;
 			velocity.y += 981.0f * deltaTime; //Gravity 
 		}
 		else if(mainCharacter.getPosition().y >= 470.0f)
 		{
 			canJump = true;
 			gravity = false;
-			velocity.y = 0.0f;
+			velocity.y = 0;
 			mainCharacter.setPosition(mainCharacter.getPosition().x, 475);
-			//std::cout << "On the ground " << gravity << "/" << velocity.y << "/" << mainCharacter.getPosition().y << std::endl;
 		}
-
+		//std::cout << "X axis: " << mainCharacter.getPosition().x << " Y axis: " << mainCharacter.getPosition().y <<std::endl;
 
 		if(velocity.x == 0.0f)
 		{
@@ -124,7 +110,7 @@ void Player::Update(float deltaTime, sf::Texture* texture, sf::Vector2u imageCou
 		else
 		{
 			row = 1;
-			if (velocity.x > 0.0f && !cantMove)
+			if(velocity.x > 0.0f && !cantMove)
 			{
 				faceRight = true;
 				cantMove = false;
@@ -137,123 +123,45 @@ void Player::Update(float deltaTime, sf::Texture* texture, sf::Vector2u imageCou
 		}
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && !cantMove && canAttack)
 		{
-			if (powerUp == 1)
+			if(powerUp == 1)
 			{
 				row = 2;
 			}
-			else if (powerUp == 2)
+			else if(powerUp == 2)
 			{
-				row = 3;
-			}
-			else if (powerUp == 3)
-			{
-				row = 5;
+				row = 4;
 			}
 		}
- 		else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+ 		else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && canJump)
 		{
 			canJump = false; 
 			cantMove = true;
 			canAttack = false;
 			if(velocity.x == 0.0f)
 			{
-				row = 4;
+				row = 3;
 			}
 		}
-
 	}
 	if(currentHealth <= 0) //Keeps the health bars from continously decreasing
 	{
 		currentHealth = 0;
-		row = 0; //943 change to dead animaton if included
 		gameOver = true;
+		velocity.y = 0;
 	}
 	if(mainCharacter.getPosition().x < 5)
 	{
 		mainCharacter.setPosition(6, mainCharacter.getPosition().y);
 	}
-	
 
-	//std::cout << cantMove << " / " << canAttack << std::endl;
-		animation.Update(row, 0, deltaTime, faceRight, dFaceRight);
-		mainCharacter.setTextureRect(animation.uvRect);
-		mainCharacter.move(velocity * deltaTime);
+	animation.Update(row, deltaTime, faceRight);
+	mainCharacter.setTextureRect(animation.uvRect);
+	mainCharacter.move(velocity * deltaTime);
 }
 
 void Player::Draw(sf::RenderWindow& window)
 {
 	window.draw(hBOutline);
 	window.draw(healthBar);
-	
 	window.draw(mainCharacter);
-
-	//std::cout << currentHealth << " / " << maxHealth << std::endl;
 }
-
-
-
-//void Player::Shoot(float deltaTime, sf::Sprite& fireBall, sf::Sprite& arrow, sf::RenderWindow& window)
-//{
-//	sf::Vector2f fireBallLocation(10,520);
-//	sf::Vector2f arrowLocation(10,520);
-//	sf::Clock animationClock;
-//	float animationDelay = 0.04f;
-//	this->cantMove;
-//	std::cout << cantMove << std::endl;
-//	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
-//	{	
-//		std::cout << powerUp << std::endl;
-//		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && powerUp == 2) //The <Control> Keyboard Key Is Pressed...
-//		{
-//			
-//			canShoot = false;
-//			powerUp = true;
-//			fireBallLocation.x = mainCharacter.getPosition().x -50;
-//			fireBallLocation.y = mainCharacter.getPosition().y +20;
-//			fireBall.setPosition(fireBallLocation.x,fireBallLocation.y);
-//		}
-//		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && powerUp == 3 && canShoot) //The <Control> Keyboard Key Is Pressed...
-//		{
-//			canShoot = false;
-//			powerUp = true;
-//			arrowLocation.x = mainCharacter.getPosition().x;
-//			arrowLocation.y = mainCharacter.getPosition().y +27;
-//			arrow.setPosition(arrowLocation.x,arrowLocation.y);
-//		}
-//
-//		if (powerUp && powerUp == 2)
-//		{
-//			fireBall.setPosition(fireBallLocation.x,fireBallLocation.y);
-//			window.draw(fireBall);
-//			if (animationClock.getElapsedTime().asSeconds() > animationDelay)
-//			{
-//				std::cout << "Yes" << std::endl;
-//				fireBallLocation.x = fireBallLocation.x + 50;
-//				animationClock.restart();
-//			}
-//			if (fireBallLocation.x > mainCharacter.getPosition().x+400)
-//			{
-//				//fireBall.setPosition(fireBallLocation.x,fireBallLocation.y);
-//				canShoot = true;
-//				powerUp = false;
-//			}
-//		}
-//
-//		if (powerUp && powerUp == 3)
-//		{
-//			arrow.setPosition(arrowLocation.x,arrowLocation.y);
-//			window.draw(arrow);
-//			if (animationClock.getElapsedTime().asSeconds() > animationDelay)
-//			{
-//				arrowLocation.x = arrowLocation.x + 50;
-//				animationClock.restart();
-//			}
-//			if (arrowLocation.x > mainCharacter.getPosition().x+400)
-//			{
-//				//arrow.setPosition(arrowLocation.x,arrowLocation.y);
-//				canShoot = true;
-//				powerUp = false;
-//			}
-//		}
-//	}
-//}

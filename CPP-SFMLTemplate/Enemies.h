@@ -12,13 +12,12 @@ public:
 	float deltaaa;
 	int currentHealth;
 	int maxHealth;
-	sf::Texture enemyText;
+	sf::Texture enemyTexture;
 	sf::Vector2f enemySpeed;
 	sf::RectangleShape healthBar, hBOutline;
 
 public:
-	void Enemies::Spawner();
-	
+
 	Enemies();
 	~Enemies();
 };
