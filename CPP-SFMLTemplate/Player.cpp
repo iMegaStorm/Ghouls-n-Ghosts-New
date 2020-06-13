@@ -72,12 +72,10 @@ void Player::Update(float deltaTime, sf::Texture* texture, sf::Vector2u imageCou
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && mainCharacter.getPosition().x > 5 && !cantMove && notShooting)
 		{
 			velocity.x -= speed;
-			velocity.x -= x;
 		}
 		else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) && mainCharacter.getPosition().x < 1809 && !cantMove && notShooting)
 		{
 			velocity.x += speed;
-			velocity.x += x;
 		}
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && canJump)
 		{
